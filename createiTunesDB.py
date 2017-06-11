@@ -1,7 +1,7 @@
 #! python3
 
 ''' This program creates a music database using XML and SQLite.
-It will parse through an iTunes XML and create s new database using SQLite.
+It will parse through an iTunes XML and create a new database using SQLite.
 Version 2.0. Developed by Kyle DuBois'''
 
 import xml.etree.ElementTree as ET
@@ -74,7 +74,7 @@ for entry in all:
     rating = lookup(entry, 'Rating')
     length = lookup(entry, 'Total Time')
 
-    if name is None or artist is None or album is None:
+    if name is None or artist is None or genre is None or album is None:
         continue
 
     #print(name, artist, album, count, rating, length)
