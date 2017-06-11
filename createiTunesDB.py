@@ -2,21 +2,27 @@
 
 ''' This program creates a music database using XML and SQLite.
 It will parse through an iTunes XML and create s new database using SQLite.
-Version 1.0. Developed by Kyle DuBois'''
+Version 2.0. Developed by Kyle DuBois'''
 
 import xml.etree.ElementTree as ET
 import sqlite3
 
-conn = sqlite3.connect('tracksdb_full.sqlite')
+conn = sqlite3.connect('tracksdb_final.sqlite')
 cur = conn.cursor()
 
 # Make some tables using executescript()
 cur.executescript('''
 DROP TABLE IF EXISTS Artist;
+DROP TABLE IF EXISTS Genre;
 DROP TABLE IF EXISTS Album;
 DROP TABLE IF EXISTS Track;
 
 CREATE TABLE Artist (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Genre (
     id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
     name    TEXT UNIQUE
 );
@@ -32,6 +38,7 @@ CREATE TABLE Track (
         AUTOINCREMENT UNIQUE,
     title TEXT  UNIQUE,
     album_id  INTEGER,
+    genre_id  INTEGER,
     len INTEGER, rating INTEGER, count INTEGER
 );
 ''')
@@ -62,6 +69,7 @@ for entry in all:
     name = lookup(entry, 'Name')
     artist = lookup(entry, 'Artist')
     album = lookup(entry, 'Album')
+    genre = lookup(entry, 'Genre')
     count = lookup(entry, 'Play Count')
     rating = lookup(entry, 'Rating')
     length = lookup(entry, 'Total Time')
@@ -69,12 +77,17 @@ for entry in all:
     if name is None or artist is None or album is None:
         continue
 
-    print(name, artist, album, count, rating, length)
+    #print(name, artist, album, count, rating, length)
 
     cur.execute('''INSERT OR IGNORE INTO Artist (name)
         VALUES ( ? )''', ( artist, ) )
     cur.execute('SELECT id FROM Artist WHERE name = ? ', (artist, ))
     artist_id = cur.fetchone()[0]
+
+    cur.execute('''INSERT OR IGNORE INTO Genre (name)
+        VALUES ( ? )''', ( genre, ) )
+    cur.execute('SELECT id FROM Genre WHERE name = ? ', (genre, ))
+    genre_id = cur.fetchone()[0]
 
     cur.execute('''INSERT OR IGNORE INTO Album (title, artist_id)
         VALUES ( ?, ? )''', ( album, artist_id ) )
@@ -87,3 +100,11 @@ for entry in all:
         ( name, album_id, length, rating, count ) )
 
     conn.commit()
+
+sqlstr = 'SELECT Track.title, Artist.name, Album.title, Genre.name FROM Track JOIN Genre JOIN Album JOIN Artist ON Track.genre_id = Genre.ID and Track.album_id = Album.id AND Album.artist_id = Artist.id ORDER BY Artist.name LIMIT 3'
+
+for row in cur.execute(sqlstr):
+    print(str(row[0]), str(row[1]), str(row[2]), str(row[3]))
+
+cur.close()
+
