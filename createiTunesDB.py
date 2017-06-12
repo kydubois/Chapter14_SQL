@@ -77,7 +77,7 @@ for entry in all:
     if name is None or artist is None or genre is None or album is None:
         continue
 
-    #print(name, artist, album, count, rating, length)
+    print(name, artist, album, genre, count, rating, length)
 
     cur.execute('''INSERT OR IGNORE INTO Artist (name)
         VALUES ( ? )''', ( artist, ) )
