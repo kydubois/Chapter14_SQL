@@ -8,7 +8,7 @@ cur = conn.cursor()
 
 # Create some tables
 cur.executescript('''
-DROP TABLE IF EXISTS USer;
+DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Course;
 DROP TABLE IF EXISTS Member;
 
